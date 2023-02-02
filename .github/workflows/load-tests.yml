@@ -16,3 +16,8 @@ jobs:
         uses: grafana/k6-action@v0.2.0
         with:
           filename: load_test.js
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: results
+          path: result.html
