@@ -8,19 +8,37 @@ Load test is used to:
 */
 
 import http from 'k6/http';
-import { sleep } from 'k6';
+import { sleep, check } from 'k6';
+import { Counter } from 'k6/metrics';
+
+// This will export to HTML as filename "result.html" AND also stdout using the text summary
+import { htmlReport } from "https://raw.githubusercontent.com/benc-uk/k6-reporter/main/dist/bundle.js";
+import { textSummary } from "https://jslib.k6.io/k6-summary/0.0.1/index.js";
+
+export function handleSummary(data) {
+  return {
+    "result.html": htmlReport(data),
+    stdout: textSummary(data, { indent: " ", enableColors: true }),
+  };
+}
 
 export let options = {
     insecureSkipTLSVerify: true,
     noConnectionReuse: false,
+    // httpDebug: 'false', // false or 'full'
+    summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(95)', 'p(99)', 'p(99.99)', 'count'],
     stages: [
-        { duration: '5s', target: 100 }, // ramp up users to 100 in 1 minute
-        { duration: '10s', target: 200 }, // stay at 100 users for 3 minutes
-        { duration: '5m', target: 0 }, // ramp down to 0 users in 2 minutes
+        { duration: '2s', target: 2 }, // ramp up users to 100 in 1 minute
+        { duration: '2s', target: 4 }, // stay at 100 users for 3 minutes
+        { duration: '2s', target: 0 }, // ramp down to 0 users in 2 minutes
 
     ],
     thresholds: {
         http_req_duration: ['p(95)<150'], // 99% of requests should complete within 150ms
+        http_reqs: ['count < 15'],
+        // fail the test if any checks fail or any requests fail
+        checks: ['rate == 1.00'],
+        http_req_failed: ['rate == 0.00'],
     }, 
 };
 
@@ -28,7 +46,13 @@ export let options = {
 
 export default () => {
 
-    let response = http.get('https://52.226.230.63/foundations-repo-template/');
-    
+    const response = http.get('https://52.226.230.63/foundations-repo-template/');
     sleep(1);
+    
+    const checkRes = check(response, {
+        'status is 200': (r) => r.status === 200,
+        'response body': (r) => r.body.indexOf('Hello World!') !== -1,
+        'protocol is HTTP/2': (r) => r.proto === 'HTTP/2.0',
+      });
+
 };
