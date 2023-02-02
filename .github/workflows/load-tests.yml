@@ -1,8 +1,20 @@
 name: load-tests
 
 on:
-  push:
-    branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      api_url:
+        description: "URL of service to run tests"
+        required: true
+        type: string
+      request_threshold:
+        description: "Request Threshold to test (p(95)<1500)"
+        required: true
+        type: string
+      request_count:
+        description: "Request count to test (count < 15)"
+        required: true
+        type: string
 
 jobs:
   k6_cloud_test:
@@ -16,7 +28,7 @@ jobs:
         uses: grafana/k6-action@v0.2.0
         with:
           filename: load_test.js
-          flags: -e API_URL=https://foundations.jetblue.com/jb-tom-demo/today -e REQUEST_THRESHOLD="p(95)<1500" -e REQUEST_COUNT="count < 15"
+          flags: -e API_URL=${{inputs.api_url}} -e REQUEST_THRESHOLD="${{inputs.request_threshold}}" -e REQUEST_COUNT="${{inputs.request_count}}"
 
       - uses: actions/upload-artifact@v3
         with:
