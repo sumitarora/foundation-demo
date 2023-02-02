@@ -1,0 +1,30 @@
+name: load-tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      api_url:
+        description: "The name of service to create"
+        required: true
+        type: string
+      users:
+        description: "Number of users"
+        required: true
+        type: string
+      duration:
+        description: "Duration to run test for in seconds(5s)"
+        required: true
+        type: string
+
+jobs:
+  k6_cloud_test:
+    name: k6 cloud test run
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: k6 Load Test
+        uses: grafana/k6-action@v0.2.0
+        with:
+          filename: load_test.js
