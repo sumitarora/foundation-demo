@@ -55,7 +55,7 @@ export default () => {
     
     const checkRes = check(response, {
         'status is 200': (r) => r.status === 200,
-        'response body': (r) => r.body.indexOf('Hello World!') !== -1,
+        'response body': (r) => r.body.indexOf('Hello User') !== -1,
         'protocol is HTTP/2': (r) => r.proto === 'HTTP/2.0',
       });
 
