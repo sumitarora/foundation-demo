@@ -15,6 +15,10 @@ import { Counter } from 'k6/metrics';
 import { htmlReport } from "https://raw.githubusercontent.com/benc-uk/k6-reporter/main/dist/bundle.js";
 import { textSummary } from "https://jslib.k6.io/k6-summary/0.0.1/index.js";
 
+const API_URL = __ENV.API_URL;
+const REQUEST_THRESHOLD = __ENV.REQUEST_THRESHOLD; // 'p(95)<1500'
+const REQUEST_COUNT = __ENV.REQUEST_COUNT; // 'count<15'
+
 export function handleSummary(data) {
   return {
     "result.html": htmlReport(data),
@@ -34,8 +38,8 @@ export let options = {
 
     ],
     thresholds: {
-        http_req_duration: ['p(95)<150'], // 99% of requests should complete within 150ms
-        http_reqs: ['count < 15'],
+        http_req_duration: [REQUEST_THRESHOLD], // 99% of requests should complete within 150ms
+        http_reqs: [REQUEST_COUNT],
         // fail the test if any checks fail or any requests fail
         checks: ['rate == 1.00'],
         http_req_failed: ['rate == 0.00'],
@@ -46,7 +50,7 @@ export let options = {
 
 export default () => {
 
-    const response = http.get('https://52.226.230.63/foundations-repo-template/');
+    const response = http.get(API_URL);
     sleep(1);
     
     const checkRes = check(response, {

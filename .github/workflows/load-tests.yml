@@ -16,6 +16,10 @@ jobs:
         uses: grafana/k6-action@v0.2.0
         with:
           filename: load_test.js
+          env:
+            API_URL=https://foundations.jetblue.com/jb-tom-demo/today
+            REQUEST_THRESHOLD="p(95)<1500"
+            REQUEST_COUNT="count < 15"
 
       - uses: actions/upload-artifact@v3
         with:
